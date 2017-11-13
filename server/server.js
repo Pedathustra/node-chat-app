@@ -1,14 +1,29 @@
 
 const path = require('path');
+const http = require('http');
 const express = require('express');
-
+const socketIO = require('socket.io')
 const port = process.env.PORT || 3000;
 
 const publicPath = path.join(__dirname,'../public');
 var app = express();
+var server = http.createServer(app);
+var io = socketIO(server); // this will be our web socket Server
+                          // this is how we will talk back and forth server/client
 app.use(express.static(publicPath));
 
-app.listen(port, ()=>{
+//io.on is a listener to open up connection between client/server
+io.on('connect', (socket)=>{
+  console.log('New user connected');
+
+    socket.on('disconnect', ()=>{
+      console.log('Client disconnected')
+    });
+});
+
+
+
+server.listen(port, ()=>{
   console.log(`Server is up on port ${port}`)
 });
 
