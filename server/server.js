@@ -15,6 +15,17 @@ app.use(express.static(publicPath));
 //io.on is a listener to open up connection between client/server
 io.on('connect', (socket)=>{
   console.log('New user connected');
+     socket.emit('welcomeMessage',{
+       from: 'Admin',
+       text: "Welcome to the chat app!",
+      createdAt: new Date().getTime()
+     })
+     socket.broadcast.emit('newUser',{
+         from: 'Admin',
+         text: `New user, , joined`,
+         createdAt: new Date().getTime()
+     });
+
     socket.on('createMessage', (message)=>{
       console.log('createMessage',message);
       io.emit('newMessage',{
@@ -22,6 +33,13 @@ io.on('connect', (socket)=>{
           text: message.text,
           createdAt: new Date().getTime()
       });
+      //this broadcasts the message to everyone but the sender
+      //good for messages like "Larry has joined chat"
+      // socket.broadcast.emit('newMessage',{
+      //     from: message.from,
+      //     text: message.text,
+      //     createdAt: new Date().getTime()
+      // });
     });
 
     socket.on('disconnect', ()=>{
