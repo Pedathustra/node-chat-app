@@ -15,20 +15,14 @@ app.use(express.static(publicPath));
 //io.on is a listener to open up connection between client/server
 io.on('connect', (socket)=>{
   console.log('New user connected');
-    socket.emit('newEmail',{
-      from:'pebbles@example.com',
-      text: 'Yo yo!',
-      createAt: 123
-    });
-    socket.emit('newMessage',{
-        from: "sophie",
-        text: "behold my awesomeness",
-        createdAt: 666
-    });
-
     socket.on('createMessage', (message)=>{
       console.log('createMessage',message);
-    })
+      io.emit('newMessage',{
+          from: message.from,
+          text: message.text,
+          createdAt: new Date().getTime()
+      });
+    });
 
     socket.on('disconnect', ()=>{
       console.log('Client disconnected')
