@@ -2,7 +2,8 @@
 const path = require('path');
 const http = require('http');
 const express = require('express');
-const socketIO = require('socket.io')
+const socketIO = require('socket.io');
+const {generateMessage} = require('./utils/message')
 const port = process.env.PORT || 3000;
 
 const publicPath = path.join(__dirname,'../public');
@@ -15,24 +16,13 @@ app.use(express.static(publicPath));
 //io.on is a listener to open up connection between client/server
 io.on('connect', (socket)=>{
   console.log('New user connected');
-     socket.emit('welcomeMessage',{
-       from: 'Admin',
-       text: "Welcome to the chat app!",
-      createdAt: new Date().getTime()
-     })
-     socket.broadcast.emit('newUser',{
-         from: 'Admin',
-         text: `New user, , joined`,
-         createdAt: new Date().getTime()
-     });
+     socket.emit('welcomeMessage',generateMessage('Admin','Welcome to the chat app!'))
+
+     socket.broadcast.emit('newUser', generateMessage('Admin','A new user has joined.'));
 
     socket.on('createMessage', (message)=>{
       console.log('createMessage',message);
-      io.emit('newMessage',{
-          from: message.from,
-          text: message.text,
-          createdAt: new Date().getTime()
-      });
+      io.emit('newMessage',generateMessage(message.from,message.text));
       //this broadcasts the message to everyone but the sender
       //good for messages like "Larry has joined chat"
       // socket.broadcast.emit('newMessage',{
