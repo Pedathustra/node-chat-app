@@ -47,9 +47,11 @@ var locationButton = jQuery('#send-location');
       return('Geolocation not supported by your browser!')
     }
     navigator.geolocation.getCurrentPosition(function (position){
+      console.log(position)
         socket.emit('createLocationMessage',{
           latitude: position.coords.latitude,
-          longitude: position.coords.longitude
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
         })
     }, function(){
       alert('Unable to fetch location.')
