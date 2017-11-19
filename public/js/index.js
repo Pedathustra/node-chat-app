@@ -29,7 +29,7 @@ socket.on('welcomeMessage', function(message){
 socket.on('newUser', function(message){
   console.log(message)
 });
- 
+
 jQuery('#message-form').on('submit',function(e){
   e.preventDefault();
   console.log('here')
@@ -37,7 +37,21 @@ jQuery('#message-form').on('submit',function(e){
   socket.emit('createMessage',{
     from: "User",
     text: jQuery('[name=message]').val()
-  }, function(){
+    } , function(){
 
-  })
-})
+  });
+});
+var locationButton = jQuery('#send-location');
+  locationButton.on('click', function(){
+    if(!navigator.geolocation){
+      return('Geolocation not supported by your browser!')
+    }
+    navigator.geolocation.getCurrentPosition(function (position){
+        socket.emit('createLocationMessage',{
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+    }, function(){
+      alert('Unable to fetch location.')
+    });
+});

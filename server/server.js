@@ -23,16 +23,10 @@ io.on('connect', (socket)=>{
     socket.on('createMessage', (message, callback)=>{
       console.log('createMessage',message);
       callback('This is from the server');
-
-
       io.emit('newMessage',generateMessage(message.from,message.text));
-      //this broadcasts the message to everyone but the sender
-      //good for messages like "Larry has joined chat"
-      // socket.broadcast.emit('newMessage',{
-      //     from: message.from,
-      //     text: message.text,
-      //     createdAt: new Date().getTime()
-      // });
+    });
+    socket.on('createLocationMessage', (coords)=>{
+        io.emit('newMessage', generateMessage('Admin', `${coords.latitude}, ${coords.longitude}`));
     });
 
     socket.on('disconnect', ()=>{
