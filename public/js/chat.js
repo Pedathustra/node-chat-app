@@ -18,7 +18,15 @@ function scrollToBottom(){
 
 
 socket.on('connect', function() {
-  console.log('connected to server');
+  var params = jQuery.deparam(window.location.search); //turns this into an Object
+  socket.emit('join', params, function(err){
+        if(err){
+            alert(err);
+            window.location.href="/";
+        }else{
+            console.log('no error with login')
+        }
+  });
 });
 socket.on('disconnect',function() {
   console.log('Disconnected from server')

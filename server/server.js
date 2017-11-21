@@ -4,6 +4,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const {generateMessage,generateLocationMessage} = require('./utils/message')
+const {isRealString} = require('./utils/validation')
 const port = process.env.PORT || 3000;
 
 const publicPath = path.join(__dirname,'../public');
@@ -16,9 +17,26 @@ app.use(express.static(publicPath));
 //io.on is a listener to open up connection between client/server
 io.on('connect', (socket)=>{
   console.log('New user connected');
-     socket.emit('newMessage',generateMessage('Admin','Welcome to the chat app!'))
 
-     socket.broadcast.emit('newMessage', generateMessage('Admin','A new user has joined.'));
+    socket.on('join',(params,callback)=>{
+        if(!isRealString(params.name) || !isRealString(params.room)){
+            callback('Name and room are required.')
+        }
+        socket.join(params.room);//this is a place for people to be part of one room.
+        //socket.leave(params.room) //this will be to leave room
+
+        //io.emit --> emits to every connect user
+        //socket.broadcast.emit --> emits to everyone but the current users
+        // socket.emit --> emits event to one user
+        //--> to make these three work for a single room, need to chain...
+          //io.emit.to('The Office Fans').emit
+          //socket.broadcast.to('The Office Fans').emit
+
+        socket.emit('newMessage',generateMessage('Admin','Welcome to the chat app!'))
+        socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin',`${params.name} has joined!`));
+
+        callback();
+    });
 
     socket.on('createMessage', (message, callback)=>{
       console.log('createMessage',message);
