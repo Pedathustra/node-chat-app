@@ -5,6 +5,8 @@ const express = require('express');
 const socketIO = require('socket.io');
 const {generateMessage,generateLocationMessage} = require('./utils/message')
 const {isRealString} = require('./utils/validation')
+const {Users} = require('./utils/users');
+
 const port = process.env.PORT || 3000;
 
 const publicPath = path.join(__dirname,'../public');
@@ -12,6 +14,7 @@ var app = express();
 var server = http.createServer(app);
 var io = socketIO(server); // this will be our web socket Server
                           // this is how we will talk back and forth server/client
+var users = new Users(); //new instance
 app.use(express.static(publicPath));
 
 //io.on is a listener to open up connection between client/server
@@ -20,9 +23,13 @@ io.on('connect', (socket)=>{
 
     socket.on('join',(params,callback)=>{
         if(!isRealString(params.name) || !isRealString(params.room)){
-            callback('Name and room are required.')
+            return callback('Name and room are required.');
         }
         socket.join(params.room);//this is a place for people to be part of one room.
+        users.removeUser(socket.id);//remove from any existing room
+        users.addUser(socket.id, params.name, params.room);
+
+        io.to(params.room).emit('updateUserList', users.getUserList(params.room));
         //socket.leave(params.room) //this will be to leave room
 
         //io.emit --> emits to every connect user
@@ -48,7 +55,11 @@ io.on('connect', (socket)=>{
     });
 
     socket.on('disconnect', ()=>{
-      console.log('Client disconnected')
+      var user = users.removeUser(socket.id);
+      if (user){
+        io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+        io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`));
+      }
     });
 });
 

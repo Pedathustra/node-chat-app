@@ -18,6 +18,23 @@ class Users{
         this.users.push(user);
         return user;
     }
+    removeUser(id){
+        //return user that was remvoed
+        var user = this.users.filter((user)=>user.id===id)[0];
+        if(user){
+            this.users = this.users.filter((user)=>user.id!==id);
+        }
+        return user;
+    }
+    getUser(id){
+            return  this.users.filter((user)=>user.id===id)[0];
+    }
+    getUserList(room){
+        //['mike', 'jen', 'caleb']
+        var users = this.users.filter((user)=>user.room===room);
+        var namesArray = users.map((user)=>user.name);
+        return namesArray;
+    }
 }
 module.exports={Users};
 
